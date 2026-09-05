@@ -16,6 +16,7 @@ __pycache__/
 !/data/processed/.gitkeep
 !/data/processed/*.dvc
 !/models/.gitkeep
+!/models/*.dvc
 
 # Отчеты, сгенерированные ноутбуками или скриптами
 /reports/*.png
