@@ -1,0 +1,27 @@
+.venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Файлы окружения
+.env
+.env.*
+
+# Данные и модели, которые при необходимости отслеживаются через DVC
+/data/raw/*
+/data/processed/*
+/models/*
+!/data/raw/.gitkeep
+!/data/raw/*.dvc
+!/data/processed/.gitkeep
+!/models/.gitkeep
+
+# Отчеты, сгенерированные ноутбуками или скриптами
+/reports/*.png
+/reports/*.jpg
+/reports/*.jpeg
+/reports/*.pdf
+
+# Локальные файлы инструментов
+.dvc/tmp/
+.dvc/cache/
