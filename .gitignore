@@ -23,6 +23,8 @@ __pycache__/
 /reports/*.jpg
 /reports/*.jpeg
 /reports/*.pdf
+!/reports/screenshots/
+!/reports/screenshots/*.png
 
 # Локальные файлы инструментов
 .dvc/tmp/
