@@ -1,0 +1,119 @@
+{
+  "dataset": {
+    "file": "titanic.csv",
+    "sha256": "81787d320d7f7b03df935e91de8bd19e11d45c5bbcab86ef4d4a76dc91b7d4f2",
+    "rows": 891,
+    "train_rows": 712,
+    "test_rows": 179,
+    "features": [
+      "pclass",
+      "sex",
+      "age",
+      "sibsp",
+      "parch",
+      "fare",
+      "embarked",
+      "deck"
+    ],
+    "target": "survived",
+    "missing_values": {
+      "pclass": 0,
+      "sex": 0,
+      "age": 177,
+      "sibsp": 0,
+      "parch": 0,
+      "fare": 0,
+      "embarked": 2,
+      "deck": 688
+    }
+  },
+  "split": {
+    "test_size": 0.2,
+    "random_state": 42,
+    "stratify": "survived"
+  },
+  "cv": {
+    "n_splits": 5,
+    "shuffle": true,
+    "random_state": 42,
+    "scoring": "roc_auc",
+    "best_score": 0.8602682388144771,
+    "candidates": [
+      {
+        "params": {
+          "classifier__C": 0.1,
+          "classifier__class_weight": null
+        },
+        "mean_test_score": 0.8602682388144771,
+        "std_test_score": 0.018693318845473875
+      },
+      {
+        "params": {
+          "classifier__C": 0.1,
+          "classifier__class_weight": "balanced"
+        },
+        "mean_test_score": 0.8597330541570354,
+        "std_test_score": 0.01919721659486563
+      },
+      {
+        "params": {
+          "classifier__C": 1.0,
+          "classifier__class_weight": null
+        },
+        "mean_test_score": 0.8588279477111765,
+        "std_test_score": 0.020352790279827032
+      },
+      {
+        "params": {
+          "classifier__C": 1.0,
+          "classifier__class_weight": "balanced"
+        },
+        "mean_test_score": 0.8585905423091944,
+        "std_test_score": 0.020980313010007225
+      },
+      {
+        "params": {
+          "classifier__C": 10.0,
+          "classifier__class_weight": null
+        },
+        "mean_test_score": 0.8557986210063012,
+        "std_test_score": 0.023129047750832545
+      },
+      {
+        "params": {
+          "classifier__C": 10.0,
+          "classifier__class_weight": "balanced"
+        },
+        "mean_test_score": 0.8546876946054063,
+        "std_test_score": 0.024947528154144995
+      }
+    ]
+  },
+  "best_params": {
+    "classifier__C": 0.1,
+    "classifier__class_weight": null
+  },
+  "test_metrics": {
+    "accuracy": 0.8156424581005587,
+    "precision": 0.8214285714285714,
+    "recall": 0.6666666666666666,
+    "f1": 0.736,
+    "roc_auc": 0.8421607378129117,
+    "confusion_matrix": [
+      [
+        100,
+        10
+      ],
+      [
+        23,
+        46
+      ]
+    ]
+  },
+  "versions": {
+    "python": "3.11.6",
+    "numpy": "2.4.6",
+    "pandas": "3.0.6",
+    "scikit_learn": "1.9.1"
+  }
+}
