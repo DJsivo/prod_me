@@ -1,0 +1,2 @@
+# Preserve the dataset bytes so its SHA-256 is stable across checkouts.
+data/external/titanic.csv -text

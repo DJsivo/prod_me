@@ -51,3 +51,5 @@ Python для проверки:
 
 Изменения независимого проверяющего: только `tests/test_titanic_pipeline.py`
 и этот отчёт. Реализация не изменялась; коммиты и push не выполнялись.
+
+Дополнительно: `git check-attr text -- data/external/titanic.csv` вернул `text: unset`; правило `.gitattributes` сохраняет байты CSV при checkout, текущий SHA-256 остался тем же.
