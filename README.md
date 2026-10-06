@@ -6,12 +6,14 @@
 Источник: [seaborn-data](https://github.com/mwaskom/seaborn-data/blob/master/titanic.csv).
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m jupyterlab
+uv sync --locked
+uv run --locked python -m ipykernel install --user --name prod-me --display-name "Python (prod-me)"
+uv run --locked jupyter lab
 ```
 
-Откройте ноутбук и выполните все ячейки по порядку. Данные загружаются локально.
+Выберите ядро `Python (prod-me)` и выполните ячейки по порядку.
+Данные загружаются локально. Версия Python задана в `.python-version`,
+зависимости — в `pyproject.toml` и `uv.lock`.
 
 ## Структура проекта
 
@@ -29,6 +31,7 @@ prod_me/
 │   └── visualization/
 ├── models/
 ├── reports/
-├── requirements.txt
+├── pyproject.toml
+├── uv.lock
 └── README.md
 ```
