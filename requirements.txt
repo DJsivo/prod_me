@@ -1,9 +1,0 @@
-pandas>=2.2,<3
-numpy
-scikit-learn
-matplotlib
-seaborn
-dvc
-jupyterlab
-joblib
-featuretools==1.31.0

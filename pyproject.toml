@@ -1,0 +1,21 @@
+[project]
+name = "prod-me"
+version = "0.1.0"
+requires-python = ">=3.11,<3.12"
+dependencies = [
+    "pandas==2.3.3",
+    "numpy==2.4.4",
+    "scikit-learn==1.9.1",
+    "matplotlib",
+    "seaborn",
+    "dvc",
+    "joblib",
+    "featuretools==1.31.0",
+    "setuptools==80.9.0",
+]
+
+[dependency-groups]
+dev = ["ipykernel", "jupyterlab", "nbclient", "nbformat"]
+
+[tool.uv]
+package = false

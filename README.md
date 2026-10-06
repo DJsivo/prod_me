@@ -5,14 +5,15 @@
 с помощью DFS (`max_depth=2`). Результаты выполнения сохранены.
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe -m ipykernel install --user --name prod-me --display-name "Python (prod-me)"
-.\.venv\Scripts\python.exe -m jupyterlab
+uv sync --locked
+uv run --locked python -m ipykernel install --user --name prod-me --display-name "Python (prod-me)"
+uv run --locked jupyter lab
 ```
 
 Выберите ядро `Python (prod-me)` и выполните ячейки по порядку.
 Данные синтетические и создаются в ноутбуке; отдельные файлы не нужны.
+Версия Python задана в `.python-version`, зависимости — в `pyproject.toml`
+и `uv.lock`.
 
 ## Структура проекта
 
@@ -30,6 +31,7 @@ prod_me/
 │   └── visualization/
 ├── models/
 ├── reports/
-├── requirements.txt
+├── pyproject.toml
+├── uv.lock
 └── README.md
 ```
