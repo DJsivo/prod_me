@@ -1,0 +1,6 @@
+outs:
+- md5: ea719ab3b6d0d1a51645d193385d7ea6.dir
+  size: 509361
+  nfiles: 2
+  hash: md5
+  path: fraud_bundle

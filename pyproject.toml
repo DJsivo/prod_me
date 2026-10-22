@@ -1,19 +1,13 @@
 [project]
-name = "prod-me"
+name = "neural-fraud-detection"
 version = "0.1.0"
 requires-python = ">=3.11,<3.12"
-dependencies = [
-    "pandas==3.0.6",
-    "numpy==2.4.6",
-    "scikit-learn==1.9.1",
-    "matplotlib",
-    "seaborn",
-    "dvc",
-    "joblib",
-]
-
-[dependency-groups]
-dev = ["ipykernel", "jupyterlab", "nbclient", "nbformat"]
-
+dependencies = ["pandas", "numpy", "scikit-learn", "matplotlib", "dvc", "joblib", "torch", "lightgbm", "umap-learn", "nbclient", "nbformat", "ipykernel"]
 [tool.uv]
 package = false
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
