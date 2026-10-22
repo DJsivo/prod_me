@@ -1,30 +1,47 @@
 # Advanced Data Methods
 
-Материалы разделены на две независимые линии работы:
-
-- [practices](https://github.com/DJsivo/prod_me/tree/practices) — задания с занятий: скриншоты, текст и презентации лекций.
-- [labs](https://github.com/DJsivo/prod_me/tree/labs) — пять работ из методички.
-
-Каждое задание выполняется в отдельной ветке от своей линии. Названия веток
-описывают тему на английском, без номеров и учебных префиксов. В `main`
-хранятся общий каркас и навигация. Готовые работы можно объединять в своей
-линии, а позднее — в общей ветке.
+## Структура проекта
 
 ```text
-main
-├── practices
-│   ├── project-structure
-│   ├── ml-pipeline
-│   └── featuretools-dfs
-└── labs
-    ├── data-reproducibility
-    ├── feature-engineering
-    ├── boosting-interpretability
-    ├── neural-fraud-detection
-    └── readmission-automl
+prod_me/
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── external/
+├── notebooks/
+├── src/
+│   ├── data/
+│   ├── features/
+│   ├── models/
+│   └── visualization/
+├── models/
+├── reports/
+├── pyproject.toml
+├── uv.lock
+└── README.md
 ```
 
-## Задания с занятий
+## Структура веток
+
+```text
+main                              # Общий каркас проекта и оглавление
+├── practices                     # Задания с лекционных (практических) занятий
+│   ├── project-structure         # Структура проекта и настройка DVC
+│   ├── ml-pipeline               # Pipeline и подбор гиперпараметров
+│   └── featuretools-dfs          # Автоматическая генерация признаков
+└── labs                          # Пять работ из методички
+    ├── data-reproducibility      # Воспроизводимость и конвейер обработки
+    ├── feature-engineering      # Пропуски, выбросы и отбор признаков
+    ├── boosting-interpretability # Бустинг, ансамбли и объяснение моделей
+    ├── neural-fraud-detection    # Нейросеть для обнаружения мошенничества
+    └── readmission-automl        # PySpark, AutoML и повторные госпитализации
+```
+
+Ветки заданий создаются от `practices` или `labs` и называются по технической
+теме, без номеров и учебных префиксов. Объединение готовых работ выполняется
+отдельно, когда оно понадобится.
+
+## Задания с лекционных (практических) занятий
 
 | Тема | Ветка |
 |---|---|
