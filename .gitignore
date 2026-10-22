@@ -2,30 +2,22 @@
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
-
-# Файлы окружения
 .env
 .env.*
-
-# Данные и модели, которые при необходимости отслеживаются через DVC
 /data/raw/*.csv
+/data/raw/*.zip
+/data/raw/*.parquet
 /data/processed/*.csv
+/data/processed/*.parquet
 /models/*.joblib
-!/data/raw/.gitkeep
-!/data/raw/*.dvc
-!/data/processed/.gitkeep
-!/data/processed/*.dvc
-!/models/.gitkeep
-!/models/*.dvc
-
-# Отчеты, сгенерированные ноутбуками или скриптами
+/models/*.pkl
+/models/*.pt
+/models/*.json
 /reports/*.png
 /reports/*.jpg
 /reports/*.jpeg
 /reports/*.pdf
-!/reports/screenshots/
-!/reports/screenshots/*.png
-
-# Локальные файлы инструментов
+/mlruns/
+/mlartifacts/
 .dvc/tmp/
 .dvc/cache/
