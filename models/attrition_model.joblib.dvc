@@ -1,0 +1,5 @@
+outs:
+- md5: ee5eff7ac0adb145a6ce01b84d010ea9
+  size: 2949305
+  hash: md5
+  path: attrition_model.joblib
