@@ -35,3 +35,5 @@ prod_me/
 ├── uv.lock
 └── README.md
 ```
+
+[Задания с занятий](https://github.com/DJsivo/prod_me/tree/practices) · [Общее оглавление](https://github.com/DJsivo/prod_me/tree/main)
