@@ -1,0 +1,5 @@
+outs:
+- md5: cb5093eccb35a4dadd4b7d251d934441
+  size: 285
+  hash: md5
+  path: employee_attrition_metrics.json

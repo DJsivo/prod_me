@@ -8,9 +8,10 @@ __pycache__/
 .env.*
 
 # Данные и модели, которые при необходимости отслеживаются через DVC
-/data/raw/*
-/data/processed/*
-/models/*
+/data/raw/*.csv
+/data/processed/*.csv
+/models/*.joblib
+/models/*.json
 !/data/raw/.gitkeep
 !/data/raw/*.dvc
 !/data/processed/.gitkeep
@@ -25,3 +26,6 @@ __pycache__/
 # Локальные файлы инструментов
 .dvc/tmp/
 .dvc/cache/
+
+!/data/processed/*.dvc
+!/models/*.dvc

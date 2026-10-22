@@ -10,6 +10,8 @@ dependencies = [
     "seaborn",
     "dvc",
     "joblib",
+    "imbalanced-learn>=0.14.2",
+    "xgboost>=3.2.0",
 ]
 
 [dependency-groups]

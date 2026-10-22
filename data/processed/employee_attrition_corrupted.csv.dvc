@@ -1,0 +1,5 @@
+outs:
+- md5: 808ed358c170449ed357fc980c92dc47
+  size: 230711
+  hash: md5
+  path: employee_attrition_corrupted.csv
