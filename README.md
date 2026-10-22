@@ -1,6 +1,6 @@
 # Advanced Data Methods
 
-## Структура проекта
+## Базовая структура проекта
 
 ```text
 prod_me/
