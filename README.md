@@ -1,17 +1,28 @@
-# Задания с занятий
+# Структура проекта и DVC
 
-Эта ветка служит основой для заданий с лекционных (практических) занятий:
-из скриншотов, текста и презентаций. Каждое задание выполняется в своей ветке.
+```text
+prod_me/
+├── data/
+│   ├── raw/           # Исходные данные
+│   ├── processed/     # Подготовленные данные
+│   └── external/      # Внешние источники
+├── notebooks/         # Анализ и эксперименты
+├── src/               # Повторно используемый код
+├── models/            # Сохранённые модели
+└── reports/           # Результаты и изображения
+```
 
-| Тема | Ветка |
-|---|---|
-| Структура проекта и DVC | [project-structure](https://github.com/DJsivo/prod_me/tree/project-structure) |
-| Pipeline и подбор параметров | [ml-pipeline](https://github.com/DJsivo/prod_me/tree/ml-pipeline) |
-| Генерация признаков Featuretools | [featuretools-dfs](https://github.com/DJsivo/prod_me/tree/featuretools-dfs) |
+Окружение управляется через `uv`; зависимости зафиксированы в `uv.lock`.
 
-Новая ветка создаётся от `practices` и называется по технической теме, без
-номера и учебного префикса. Зависимости фиксируются через `uv`.
-Готовые работы можно объединять в этой ветке, сохраняя независимые каталоги
-и окружения при несовместимых зависимостях.
+```powershell
+uv sync --locked
+uv run --locked dvc status
+uv run --locked jupyter lab
+```
 
-[Общее оглавление](https://github.com/DJsivo/prod_me/tree/main) · [Работы по методичке](https://github.com/DJsivo/prod_me/tree/labs)
+DVC уже инициализирован. Данные и модели добавляются командами `uv run dvc add`;
+в Git сохраняются только их `.dvc`-файлы. Окружение, кэши и содержимое
+наборов данных не отслеживаются Git. Конкретный датасет в этом задании
+не используется.
+
+[Задания с занятий](https://github.com/DJsivo/prod_me/tree/practices) · [Общее оглавление](https://github.com/DJsivo/prod_me/tree/main)
