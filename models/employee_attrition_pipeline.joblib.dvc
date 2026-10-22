@@ -1,0 +1,5 @@
+outs:
+- md5: 793767210ea8d1dce2fcfb1b47e3c48e
+  size: 9146
+  hash: md5
+  path: employee_attrition_pipeline.joblib

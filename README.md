@@ -1,20 +1,27 @@
-# Работы по методичке
+# Employee Attrition: воспроизводимый конвейер
 
-Эта ветка служит основой для пяти работ из исходной методички.
-Задания с занятий находятся в отдельной линии `practices`.
+Данные IBM HR: 1 470 сотрудников, цель `Attrition`. Вариант 14.
+Исходный файл: [IBM HR Analytics](https://www.kaggle.com/datasets/pavansubhasht/ibm-hr-analytics-attrition-dataset).
 
-| Тема | Ветка |
-|---|---|
-| Воспроизводимость исследований | [data-reproducibility](https://github.com/DJsivo/prod_me/tree/data-reproducibility) |
-| Инженерия и отбор признаков | [feature-engineering](https://github.com/DJsivo/prod_me/tree/feature-engineering) |
-| Бустинг, ансамбли и интерпретация | [boosting-interpretability](https://github.com/DJsivo/prod_me/tree/boosting-interpretability) |
-| Нейросеть и визуализация мошеннических транзакций | [neural-fraud-detection](https://github.com/DJsivo/prod_me/tree/neural-fraud-detection) |
-| Spark, AutoML и повторные госпитализации | [readmission-automl](https://github.com/DJsivo/prod_me/tree/readmission-automl) |
+```powershell
+uv sync --locked
+uv run --locked jupyter lab
+```
 
-Новая ветка создаётся от `labs` и называется по технической теме, без номера
-и учебного префикса. Вариант — 14; датасет для каждой темы определяется
-её таблицей вариантов. Зависимости фиксируются через `uv`.
-Готовые работы можно объединять в этой ветке, сохраняя независимые каталоги
-и окружения при несовместимых зависимостях.
+Откройте `notebooks/employee_attrition.ipynb`. Исходный CSV должен находиться
+в `data/raw/WA_Fn-UseC_-HR-Employee-Attrition.csv`. Данные и модель отслеживаются
+DVC; при настроенном remote их можно получить командой `uv run dvc pull`.
+Общий DVC remote в репозитории пока не настроен, поэтому при новом клонировании
+исходный CSV нужно скачать по ссылке выше.
 
-[Общее оглавление](https://github.com/DJsivo/prod_me/tree/main) · [Задания с занятий](https://github.com/DJsivo/prod_me/tree/practices)
+В двух числовых колонках создаётся 10% пропусков. Пайплайн добавляет
+`YearsBeforeCurrentRole`, заполняет пропуски, масштабирует числовые признаки,
+кодирует категории и обучает логистическую регрессию. Test — 20%,
+стратификация, `random_state=42`.
+
+Результаты сохранены в ноутбуке; модель — `models/employee_attrition_pipeline.joblib`.
+Класс трансформера находится в `src/features/tenure.py`, чтобы модель можно
+было загрузить в новом Python-процессе. Снимки исходной проверки находятся
+в `reports/screenshots/`.
+
+[Работы по методичке](https://github.com/DJsivo/prod_me/tree/labs) · [Общее оглавление](https://github.com/DJsivo/prod_me/tree/main)

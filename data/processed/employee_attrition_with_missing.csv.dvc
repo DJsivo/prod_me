@@ -1,0 +1,5 @@
+outs:
+- md5: e23bfaaca591567a6174baef151cc597
+  size: 232430
+  hash: md5
+  path: employee_attrition_with_missing.csv
