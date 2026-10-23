@@ -1,0 +1,4 @@
+,Model,Accuracy,AUC,Recall,Prec.,F1,Kappa,MCC,TT (Sec)
+lda,Linear Discriminant Analysis,0.9054,0.6557,0.064,0.3204,0.1055,0.0786,0.1084,0.23
+gbc,Gradient Boosting Classifier,0.9119,0.6546,0.0234,0.4843,0.0447,0.037,0.0916,0.9033
+ada,Ada Boost Classifier,0.9112,0.647,0.018,0.4204,0.0345,0.0271,0.071,0.4833

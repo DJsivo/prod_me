@@ -1,0 +1,43 @@
+{
+  "counts": {
+    "raw_rows": 101766,
+    "deduplicated_encounters": 101766,
+    "unique_patients": 71518,
+    "training_pool": 57214,
+    "automl_rows": 18000,
+    "holdout_rows": 14304,
+    "training_positives": 1584,
+    "holdout_positives": 1259,
+    "patient_overlap": 0
+  },
+  "versions": {
+    "pycaret": "3.3.2",
+    "pyspark": "3.5.9",
+    "scikit-learn": "1.4.2",
+    "pandas": "2.1.4",
+    "mlflow": "2.22.5"
+  },
+  "runs": [
+    {
+      "run": "linear-trees",
+      "run_id": "ea3597f96fbd4648badbddbe13a4af3d",
+      "selected": "LogisticRegression",
+      "cv_auc": 0.6531,
+      "roc_auc": 0.6427090072215959,
+      "accuracy": 0.9117030201342282,
+      "f1": 0.01096319498825372,
+      "pr_auc": 0.16753721124551718
+    },
+    {
+      "run": "boosting-discriminant",
+      "run_id": "6a41a0038d7f4bd9be6d7df29ba01285",
+      "selected": "LinearDiscriminantAnalysis",
+      "cv_auc": 0.6557,
+      "roc_auc": 0.6455538672725407,
+      "accuracy": 0.908417225950783,
+      "f1": 0.08519553072625698,
+      "pr_auc": 0.17292177159720745
+    }
+  ],
+  "selected_by_cv": "boosting-discriminant"
+}

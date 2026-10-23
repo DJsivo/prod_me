@@ -1,0 +1,5 @@
+outs:
+- md5: 47100411c9c5ca5d97bd9f21afc02e69
+  size: 3170254
+  hash: md5
+  path: diabetes_hospitals.zip

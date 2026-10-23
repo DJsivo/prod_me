@@ -1,19 +1,20 @@
 [project]
-name = "prod-me"
+name = "readmission-automl"
 version = "0.1.0"
 requires-python = ">=3.11,<3.12"
 dependencies = [
-    "pandas==3.0.6",
-    "numpy==2.4.6",
-    "scikit-learn==1.9.1",
-    "matplotlib",
-    "seaborn",
-    "dvc",
-    "joblib",
+  "numpy==1.26.4",
+  "pandas==2.1.4",
+  "scipy==1.11.4",
+  "scikit-learn==1.4.2",
+  "pycaret==3.3.2",
+  "pyspark>=3.5.3,<3.6",
+  "mlflow>=2.20,<3",
+  "sqlalchemy>=2.0,<2.1",
+  "pyarrow>=14,<20",
+  "dvc>=3,<4",
 ]
-
 [dependency-groups]
 dev = ["ipykernel", "jupyterlab", "nbclient", "nbformat"]
-
 [tool.uv]
 package = false

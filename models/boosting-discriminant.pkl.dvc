@@ -1,0 +1,5 @@
+outs:
+- md5: 82653766c8626f7e45b89419bf2f74b2
+  size: 57281
+  hash: md5
+  path: boosting-discriminant.pkl
