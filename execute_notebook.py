@@ -6,11 +6,9 @@ import json, sys
 from nbclient import NotebookClient
 root=Path(__file__).resolve().parent
 nb=nbformat.v4.new_notebook()
-nb.cells=[nbformat.v4.new_markdown_cell('''# Neural credit-card fraud detection
+nb.cells=[nbformat.v4.new_markdown_cell('''# Обнаружение мошенничества по банковским транзакциям
 
-Variant 14 of the tabular neural-network assignment. Acceptance: genuine data; seed 42 train/validation/test; train-only imputation/scaling; LightGBM baseline; two PyTorch MLP configurations selected by validation average precision with early stopping; untouched test evaluation; PCA, t-SNE and UMAP; reloadable saved artifacts.
-
-Data: [official TensorFlow tutorial and public CSV mirror](https://www.tensorflow.org/tutorials/structured_data/imbalanced_data), originally ULB/Worldline [Credit Card Fraud Detection](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud). The unchanged source has 284,807 rows and 492 frauds, with Time, V1–V28, Amount and Class. V1–V28 are already anonymised PCA features. No categorical columns exist, so categorical mode/label encoding and nn.Embedding are inapplicable.'''),nbformat.v4.new_code_cell('''from pathlib import Path
+Вариант 14. Сравниваем LightGBM и две полносвязные сети PyTorch на Credit Card Fraud. Исходные данные содержат 284807 транзакций и 492 мошенничества. Time, Amount и V1–V28 — числовые признаки; V1–V28 уже анонимизированы методом PCA. Категорий нет, поэтому Embedding не требуется. Данные доступны через официальный учебный источник TensorFlow; исходный CSV проверяется по контрольной сумме.'''),nbformat.v4.new_code_cell('''from pathlib import Path
 import sys
 ROOT = Path.cwd()
 if ROOT.name == 'notebooks': ROOT = ROOT.parent
@@ -18,35 +16,31 @@ sys.path.insert(0, str(ROOT / 'src'))
 import pandas as pd
 from fraud import load_data, run, projections
 raw = load_data()
-print(raw.shape, 'fraud:', int(raw.Class.sum()))
-display(raw.head(), raw.isna().sum().to_frame('missing').T)
-'''),nbformat.v4.new_markdown_cell('''## Leakage control and training
+print(raw.shape, 'мошенничеств:', int(raw.Class.sum()))
+display(raw.head(), raw.isna().sum().to_frame('пропуски').T)
+'''),nbformat.v4.new_markdown_cell('''## Подготовка и обучение
 
-Remove exact duplicate transactions before a stratified 60/20/20 split. This prevents identical records in separate partitions. Keep validation and test at their natural deduplicated prevalence. For CPU efficiency, retain all training frauds and sample 30,000 training normals; report both prevalences explicitly. Fit median imputation and StandardScaler on this training subset only. No synthetic data are introduced.
+Удаляем точные дубликаты до стратифицированного разделения train/validation/test 60/20/20, seed=42. В train сохраняем все мошенничества и 30000 обычных операций для воспроизводимого ограниченного эксперимента; validation и test сохраняют естественные доли классов. Медианы и StandardScaler обучаются только на используемом train.
 
-Train two MLPs with BatchNorm, ReLU, Dropout, Adam and BCEWithLogitsLoss weighted by the *used training* class ratio. Batch size 256; at most 35 epochs; patience 5 on validation AP. Compare 128–64/dropout .2/lr .001 and 64–32/dropout .4/lr .0005. Validation AP selects the checkpoint and architecture. The selected model is not refit on validation. Choose each model's F1 threshold on validation only. Test is used only after all choices. CPU PyTorch wheel is intentional on this machine; the device check is recorded below and CUDA is used if available in a compatible installation.'''),nbformat.v4.new_code_cell('''data, preprocessing, features, report = run()
+Обучение сети выполняется на CUDA. Сравниваются архитектуры 128–64 и 64–32, Dropout 0.2/0.4, learning rate 0.001/0.0005. Обе сети используют BatchNorm, ReLU, Adam, batch=256 и BCEWithLogitsLoss с весом редкого класса. Максимум 35 эпох, patience=5 по validation AP. Валидация выбирает конфигурацию, checkpoint и F1-порог. Test не используется для выбора.'''),nbformat.v4.new_code_cell('''data, preprocessing, features, report = run()
 display(pd.DataFrame(report['split']).T)
-print('Device:', report['device'], 'duplicates removed:', report['duplicates_removed'])
-print('Selected:', report['selected_config'], 'epoch:', report['best_epoch'])
+print('Устройство:', report['device'], 'удалено дубликатов:', report['duplicates_removed'])
+print('Выбрано:', report['selected_config'], 'эпоха:', report['best_epoch'])
 display(pd.DataFrame(report['test']).T)
-print('Validation AP:', report['validation_ap'])
+print('AP на валидации:', report['validation_ap'])
 '''),nbformat.v4.new_code_cell('''import matplotlib.pyplot as plt
 fig, ax = plt.subplots(figsize=(8,4))
 for i, history in enumerate(report['histories']):
-    ax.plot([r['epoch'] for r in history], [r['validation_ap'] for r in history], label=f'configuration {i+1}')
-ax.set(xlabel='Epoch', ylabel='Validation average precision', title='Validation model selection')
+    ax.plot([r['epoch'] for r in history], [r['validation_ap'] for r in history], label=f'конфигурация {i+1}')
+ax.set(xlabel='Эпоха', ylabel='Average precision на валидации', title='Выбор модели по валидации')
 ax.legend(); plt.show()
-'''),nbformat.v4.new_markdown_cell('''## Descriptive projections
+'''),nbformat.v4.new_markdown_cell('''## Визуализация
 
-Project 2,500 sampled normal transactions and 400 sampled frauds, using the fitted training scaler. PCA retains all 30 available dimensions before nonlinear projections (the requirement is up to 50); plot its first two axes separately. The enriched 2,900-row sample intentionally improves visibility of the rare class and does not estimate real prevalence. The same observations and labels are used by all three plots; labels do not fit the projections. These descriptive plots cover data from all splits and are created after test evaluation; they do not influence model selection.'''),nbformat.v4.new_code_cell('projections(data, preprocessing, features)'),nbformat.v4.new_markdown_cell('''## Interpretation and limits
+PCA сохраняет доступные 30 компонент, затем t-SNE и UMAP строят двумерные проекции. Для видимости редкого класса используются 2500 обычных и 400 мошеннических транзакций. Доля мошенничества на рисунке намеренно завышена. Проекции описательные, строятся после тестирования и не влияют на подбор модели. Цвета обозначают реальные классы.'''),nbformat.v4.new_code_cell('projections(data, preprocessing, features)'),nbformat.v4.new_markdown_cell('''## Выводы и ограничения
 
-The executed run selected the 128-64 MLP at epoch 12 (validation AP .811114); the smaller configuration reached .763850. Test AP is .717185 for MLP versus .791736 for LightGBM, so the boosting baseline ranks the rare frauds better on this split. Both detect 71/95 test frauds at validation-selected thresholds; false positives are 9 and 8 respectively.
+Точные метрики, выбранная архитектура, эпоха, пороги и устройство представлены в таблицах выше и reports/fraud_metrics.json. Сравниваем модели по ROC-AUC, average precision и F1, а не только accuracy: обычные транзакции составляют подавляющее большинство.
 
-In these plots, PCA places many frauds far from the dense normal cloud but retains overlapping cases near its centre. t-SNE and UMAP show fraud-rich regions as well as fraudulent observations embedded among normal transactions. This supports partial structure, not complete separation.
-
-Accuracy is dominated by normal transactions; ROC-AUC and especially average precision reveal rare-event ranking quality. F1 and confusion matrices refer to validation-selected thresholds. Training undersampling and class weighting alter the learned probability prior: scores are useful for ranking but are not calibrated operational fraud probabilities. The representative test prevalence is therefore essential.
-
-PCA shows the strongest linear variation; overlap in two axes cannot prove that the original 30-dimensional problem is inseparable. t-SNE and UMAP emphasise local neighbourhoods and may form islands even in continuous data. Apparent class concentrations can suggest structure, but neither island distances nor visual separation prove generalisation. The random transaction split is educational; a time-based evaluation and stronger transaction/customer grouping would be needed for deployment. Duplicate removal changes the original benchmark population and the exact counts are reported above. Saved weights and preprocessing are round-trip checked before success.''')]
+PCA показывает линейную структуру и перекрытие классов; t-SNE и UMAP подчёркивают локальные группы, но расстояния между островками не доказывают разделимость и качество модели. Подвыборка train и веса изменяют распределение обучения, поэтому scores не являются калиброванными вероятностями. Случайное разделение — учебный benchmark; для применения необходимы временная проверка, группировка клиентов и калибровка. Сохранённые веса и предобработка проверяются повторной загрузкой.''')]
 nb.metadata={'kernelspec':{'display_name':'Python (fraud)','language':'python','name':'python3'},'language_info':{'name':'python'}}
 path=root/'notebooks/neural_fraud_detection.ipynb'
 nbformat.write(nb,path)
@@ -56,5 +50,13 @@ spec=kernel_root/'fraud'; spec.mkdir(parents=True,exist_ok=True)
 manager=KernelManager(kernel_name='fraud',kernel_spec_manager=KernelSpecManager(kernel_dirs=[str(kernel_root)]))
 client=NotebookClient(nb,timeout=1800,km=manager,resources={'metadata':{'path':str(root)}})
 client.execute()
+report = json.loads((root/'reports/fraud_metrics.json').read_text(encoding='utf-8'))
+a, b = report['test']['mlp'], report['test']['lightgbm']
+nb.cells[-1].source += (f"\n\nФактический запуск: {report['device']}, {report['gpu_name']}. "
+    f"Выбрана MLP {report['selected_config']['widths']}, эпоха {report['best_epoch']}. "
+    f"Test AP: MLP {a['average_precision']:.6f}, LightGBM {b['average_precision']:.6f}; "
+    f"ROC-AUC: {a['roc_auc']:.6f} и {b['roc_auc']:.6f}. "
+    f"Матрица MLP (строки — реальность, столбцы — прогноз): {a['confusion_matrix']}. "
+    + ("LightGBM лучше ранжирует редкие мошенничества по AP." if b['average_precision'] > a['average_precision'] else ("MLP лучше ранжирует редкие мошенничества по AP." if a['average_precision'] > b['average_precision'] else "AP моделей совпала." )))
 nbformat.write(nb,path)
-print('Executed:',path)
+print('Выполнено:',path)

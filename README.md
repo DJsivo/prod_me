@@ -1,41 +1,36 @@
-# Neural fraud detection
+# Обнаружение мошенничества: нейронная сеть и бустинг
 
-Tabular neural-network assignment, variant 14: genuine ULB/Worldline Credit Card Fraud Detection. The raw CSV is downloaded unchanged from the [official TensorFlow tutorial mirror](https://www.tensorflow.org/tutorials/structured_data/imbalanced_data); [original dataset](https://www.kaggle.com/datasets/mlg-ulb/creditcardfraud). No account or credentials are needed.
+Вариант 14: Credit Card Fraud, 284807 исходных транзакций. Источник: https://www.tensorflow.org/tutorials/structured_data/imbalanced_data. Исходный CSV сохраняется неизменным и проверяется по контрольной сумме.
 
-## Reproduce
+## Запуск
 
-Python 3.11.6, dependencies fixed by `uv.lock`; PyTorch uses the official CPU wheel index. On a CUDA machine install a matching CUDA build explicitly and regenerate the lock before reporting GPU results. The implementation records the chosen device and supports CUDA when available.
+Python 3.11 и NVIDIA GPU с драйвером, поддерживающим CUDA 12.8. PyTorch устанавливается из официального индекса CUDA через uv. Перед выполнением проверяется доступность CUDA; CPU-запуск не выдаётся за выполнение требования GPU.
 
 ```powershell
 py -3.11 -m uv sync --locked
 py -3.11 -m uv run --locked python execute_notebook.py
-py -3.11 -m uv run --locked dvc add data/raw/creditcard.csv models/fraud_bundle
 py -3.11 -m uv run --locked dvc status
 ```
 
-The notebook runner writes an executed `notebooks/neural_fraud_detection.ipynb` from a clean kernel. `load_data()` downloads the source if absent; this is needed on a fresh clone because no remote DVC storage is configured. The resulting source SHA-256 and exact split counts are recorded in `reports/fraud_metrics.json`. Model artifacts are regenerable by executing the notebook; DVC tracks the source and `models/fraud_bundle` directory. `dvc pull` requires a separately configured remote and is not claimed to work here.
+Если на диске C мало места, можно задать локальные UV_CACHE_DIR и UV_PROJECT_ENVIRONMENT на другом диске перед этими командами. Эти машинные пути не входят в конфигурацию проекта.
 
-## Method
+Ноутбук `notebooks/neural_fraud_detection.ipynb` создаётся и исполняется с чистым ядром. Данные и сохранённая папка модели отслеживаются DVC. Remote не настроен: при отсутствии локального кэша исходный CSV скачивается загрузчиком; модели восстанавливаются повторным выполнением.
 
-Remove exact duplicates before splitting to avoid identical transactions across partitions. Stratified seed-42 split: 60% training, 20% validation, 20% test. Only training is undersampled: all its frauds and 30,000 normals. Holdouts retain natural prevalence. Fit median imputation and standardisation on training only. All 30 inputs are numeric; categorical embeddings do not apply.
+## Методика
 
-Compare LightGBM to two PyTorch MLPs (128–64, dropout .2, lr .001; 64–32, dropout .4, lr .0005). Both use BatchNorm, ReLU, Adam, batch 256, weighted BCE, 35-epoch cap and patience 5. Validation average precision selects checkpoints/configuration. Validation F1 selects decision thresholds. Test is evaluated afterwards, never used to select parameters. Saved architecture, state dict and preprocessing are round-trip tested.
+Точные дубликаты удаляются до стратифицированного разделения train/validation/test 60/20/20 (seed 42). В train используются все мошенничества и 30000 обычных операций; валидация и тест сохраняют естественные доли классов. Импутация медианой и StandardScaler обучаются только на используемом train. Все 30 признаков числовые, поэтому Embedding для категорий неприменим.
 
-PCA retains the available 30 dimensions, then t-SNE and UMAP operate on a descriptive enriched sample of 2,500 normal and 400 fraudulent transactions. All three plots are saved as notebook outputs. Sample enrichment is for visibility only; embedding clusters do not prove class separation or operational performance.
+Две MLP: 128–64/Dropout 0.2/lr 0.001 и 64–32/Dropout 0.4/lr 0.0005. Используются BatchNorm, ReLU, Adam, batch 256, BCEWithLogitsLoss с весом редкого класса. Максимум 35 эпох, patience 5 по validation average precision. Валидация выбирает checkpoint, конфигурацию и порог F1. Test не участвует в подборе. Сравнение выполняется с LightGBM; веса сети и предобработка проверяются после сохранения и загрузки.
 
-## Results
+PCA сохраняет доступные 30 компонент перед t-SNE/UMAP; отдельно рисуются первые две. Для наглядности выбраны 2500 обычных и 400 мошеннических операций: рисунки не показывают реальную распространённость мошенничества. Проекции построены после оценки test и не влияют на подбор.
 
-The clean CPU run selected the 128-64 MLP, dropout .2, lr .001 at epoch 12 (validation AP .811114). The alternative configuration reached validation AP .763850. LightGBM validation AP was .871440.
+Точные результаты, история, устройство, версия PyTorch/CUDA и пороги сохранены в `reports/fraud_metrics.json` и выполненном ноутбуке. Accuracy при крайнем дисбалансе недостаточна: основное сравнение по AP и ROC-AUC. Подвыборка и веса изменяют априорную частоту, поэтому scores не являются калиброванными вероятностями. Для практического применения требуются временная и групповая проверки.
 
-| Test model | ROC-AUC | Average precision | F1 | Accuracy |
+## Результат фактического GPU-запуска
+
+Устройство: NVIDIA GeForce RTX 3050 Ti Laptop GPU; PyTorch 2.11.0+cu128, CUDA 12.8. Выбрана сеть [128, 64], лучшая эпоха 13.
+
+| Модель | ROC-AUC | Average precision | F1 | Accuracy |
 |---|---:|---:|---:|---:|
-| MLP | .959869 | .717185 | .811429 | .999418 |
-| LightGBM | .971304 | .791736 | .816092 | .999436 |
-
-LightGBM ranked rare fraud cases better on this split. Both selected thresholds detected 71 of 95 test frauds; MLP produced 9 false positives and LightGBM 8. The test contains 56,746 rows; validation 56,745; training before sampling 170,235 and after sampling 30,284 (284 frauds). Source deduplication removed 1,081 exact duplicates, leaving 473 frauds. Used training prevalence is .9378%, versus .1674% on test.
-
-PCA shows many frauds extending away from the dense normal cloud but also overlap near its centre. t-SNE and UMAP both show fraud-rich regions alongside fraudulent points mixed with normal transactions. These visual patterns do not establish complete separability.
-
-Exact metrics, validation histories, thresholds and confusion matrices: `reports/fraud_metrics.json` and the executed notebook. Average precision is the primary ranking metric because accuracy is misleading under extreme imbalance. Undersampling plus class weighting means scores are not calibrated fraud probabilities. A random split of historical anonymous transactions is an educational benchmark; deployment needs temporal/grouped evaluation and calibration.
-
-[Assignment index](https://github.com/DJsivo/prod_me/tree/labs) · [Project index](https://github.com/DJsivo/prod_me/tree/main)
+| mlp | 0.963153 | 0.719420 | 0.791209 | 0.999330 |
+| lightgbm | 0.971304 | 0.791736 | 0.816092 | 0.999436 |

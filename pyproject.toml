@@ -6,8 +6,8 @@ dependencies = ["pandas", "numpy", "scikit-learn", "matplotlib", "dvc", "joblib"
 [tool.uv]
 package = false
 [tool.uv.sources]
-torch = { index = "pytorch-cpu" }
+torch = { index = "pytorch-cuda" }
 [[tool.uv.index]]
-name = "pytorch-cpu"
-url = "https://download.pytorch.org/whl/cpu"
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu128"
 explicit = true
