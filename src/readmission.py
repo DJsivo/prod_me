@@ -1,4 +1,4 @@
-"""Spark preparation and CPU AutoML for early diabetes readmission."""
+"""Подготовка в Spark и AutoML для повторной госпитализации."""
 from pathlib import Path
 import json
 import os
@@ -32,15 +32,15 @@ def prepare():
              .withColumn('early_readmission', (F.col('readmitted') == '<30').cast('int')))
     clean.printSchema()
     clean.show(10, truncate=False)
-    # One earliest recorded encounter per patient: no patient can cross folds or holdout.
+    # Одна первая запись на пациента исключает пересечение пациентов между выборками.
     unique = clean.withColumn('_rn', F.row_number().over(Window.partitionBy('patient_nbr').orderBy('encounter_id'))).where('_rn=1').drop('_rn')
     keep = numeric + ['patient_nbr','total_prior_visits','medications_per_day','labs_per_day',
         'race','gender','age','admission_type_id','discharge_disposition_id','admission_source_id',
         'max_glu_serum','A1Cresult','insulin','change','diabetesMed','early_readmission']
     pdf = unique.select(keep).toPandas()
-    # Stable global order makes the seeded holdout independent of Spark partitions.
+    # Постоянный порядок делает разделение независимым от порядка разделов Spark.
     pdf = pdf.sort_values('patient_nbr').reset_index(drop=True)
-    # Administrative codes are categories, not ordered magnitudes.
+    # Административные коды — категории, а не числовые величины.
     for col in ['admission_type_id','discharge_disposition_id','admission_source_id']:
         pdf[col] = pdf[col].astype(str)
     pdf = pdf.replace({None: np.nan})
@@ -75,7 +75,7 @@ def train(pdf, counts):
     results = []
     for label, models in [('linear-trees',['lr','dt','rf']), ('boosting-discriminant',['ada','gbc','lda'])]:
         exp = ClassificationExperiment()
-        # PyCaret's internal holdout is drawn from training only; external test remains sealed.
+        # Внутренняя проверочная выборка PyCaret берётся только из train, внешний test не участвует.
         exp.setup(data=train_data, target='early_readmission', session_id=SEED,
             fold_strategy='stratifiedkfold', fold=3, fold_shuffle=True,
             normalize=True, n_jobs=2, verbose=False, html=False, log_experiment=False,
@@ -87,9 +87,9 @@ def train(pdf, counts):
                 budget_time=2, errors='raise', verbose=False)
             board = exp.pull()
             assert len(board) >= 3, 'Time budget did not complete all three candidates'
-            print(f'Cross-validation leaderboard: {label}\n{board.to_string()}')
+            print(f'Таблица кросс-валидации: {label}\n{board.to_string()}')
             board.to_csv(ROOT/f'reports/leaderboard_{label}.csv')
-            # Finalization includes only supplied train_data, never external test.
+            # Финальное обучение использует только train_data, без внешнего test.
             final = exp.finalize_model(best)
             X = test.drop(columns='early_readmission')
             prob = final.predict_proba(X)[:,1]
@@ -122,7 +122,7 @@ def reload_check(result):
     model = load_model(str(ROOT/'models'/result['selected_by_cv']),verbose=False)
     probabilities = model.predict_proba(pdf.drop(columns=['early_readmission','patient_nbr']).head(10))
     assert probabilities.shape == (10,2) and np.isfinite(probabilities).all()
-    print('Reloaded full preprocessing pipeline:', probabilities.shape)
+    print('Загружен полный конвейер предобработки:', probabilities.shape)
     return probabilities
 
 if __name__ == '__main__':

@@ -20,7 +20,7 @@
   "runs": [
     {
       "run": "linear-trees",
-      "run_id": "ea3597f96fbd4648badbddbe13a4af3d",
+      "run_id": "280d68936e5649e9bca8fc8d639c2726",
       "selected": "LogisticRegression",
       "cv_auc": 0.6531,
       "roc_auc": 0.6427090072215959,
@@ -30,7 +30,7 @@
     },
     {
       "run": "boosting-discriminant",
-      "run_id": "6a41a0038d7f4bd9be6d7df29ba01285",
+      "run_id": "ea5310ccd8ed4915a3935edc75261440",
       "selected": "LinearDiscriminantAnalysis",
       "cv_auc": 0.6557,
       "roc_auc": 0.6455538672725407,

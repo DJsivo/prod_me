@@ -1,12 +1,10 @@
-# Early diabetes readmission
+# Повторная госпитализация: Spark и AutoML
 
-Spark preparation and two PyCaret searches for the UCI Diabetes 130-US Hospitals dataset (variant 14). The assignment explicitly permits the original approximately 100,000 records. Source: https://archive.ics.uci.edu/dataset/296/diabetes+130+us+hospitals+for+years+1999+2008 (CC BY 4.0; Strack et al., 2014).
+Вариант 14. UCI Diabetes 130-US hospitals: 101766 исходных записей; методичка разрешает этот объём без синтетического увеличения. Источник: https://archive.ics.uci.edu/dataset/296/diabetes+130+us+hospitals+for+years+1999+2008 (CC BY 4.0).
 
-The target is readmission within 30 days (`<30`), versus `NO`/`>30`. Keep the earliest observed encounter per patient before splitting; patient identifiers and the original target never enter predictors. This evaluates first observed encounters with information available at discharge. Spark replaces `?`, removes duplicate encounters, casts numerical fields and creates three features. All learned preprocessing stays inside training CV.
+## Запуск
 
-## Reproduce
-
-Python 3.11 and Java 11 are required for the locked Spark 3.5 environment. Set `JAVA_HOME` to a local JDK 11 installation, for example on this Windows machine:
+Python 3.11, Java 11. Из корня проекта:
 
 ```powershell
 $env:JAVA_HOME = 'C:\Program Files\Microsoft\jdk-11.0.16.101-hotspot'
@@ -15,18 +13,33 @@ py -3.11 -m uv run --locked dvc checkout
 py -3.11 -m uv run --locked jupyter lab
 ```
 
-Run every cell of `notebooks/readmission_automl.ipynb` from a fresh kernel. Alternatively, `py -3.11 -m uv run --locked python -m src.readmission` runs the same pipeline. Raw data are immutable. DVC cache is local; no remote dataset store is configured. If the cache is unavailable, download the UCI archive and extract `diabetic_data.csv` into `data/raw/` before execution.
+Откройте `notebooks/readmission_automl.ipynb` и выполните с чистым ядром. Альтернатива: `uv run --locked python -m src.readmission`. DVC remote не настроен: при отсутствии кэша скачайте архив UCI, поместите его и diabetic_data.csv в data/raw. Исходные данные неизменны, обработанная таблица и полные модели отслеживаются DVC.
 
-Patients are sorted by identifier before the seeded split, independent of Spark partition order. The external stratified 20% holdout is separated before an 18,000-patient training sample. Each search compares three algorithms with three stratified CV folds and a two-minute budget. The first uses logistic regression (baseline), decision tree and random forest (`lr,dt,rf`); the second uses AdaBoost, gradient boosting and linear discriminant analysis (`ada,gbc,lda`). Model selection uses CV ROC-AUC. Report external ROC-AUC, accuracy, F1 and average precision (PR-AUC); the default 0.5 threshold is unchanged. The held-out patients do not participate in finalization.
+## Методика
 
-`reports/results.json` contains exact counts, versions, run identifiers and metrics. `reports/leaderboard_*.csv` contains actual CV comparisons. `models/*.pkl` stores complete preprocessing pipelines. The notebook reloads a saved model and verifies finite probabilities.
+Цель — повторная госпитализация ранее 30 дней, остальные исходы — класс 0. Spark заменяет ?, удаляет дубликаты, приводит типы, создаёт total_prior_visits, medications_per_day, labs_per_day. Схема и десять строк выведены в ноутбуке. На пациента оставлена первая зарегистрированная запись по encounter_id. Сортировка по patient_nbr делает разбиение воспроизводимым; идентификаторы и исходный readmitted исключены из признаков.
 
-## Local experiment comparison
+Test 20% отделён до подвыборки 18000 обучающих пациентов. Предобработка обучается внутри трёхфолдовой стратифицированной CV PyCaret. Два поиска с бюджетом по две минуты: lr/dt/rf и ada/gbc/lda. Логистическая регрессия служит baseline. Финализация использует только обучающие данные. Выбор по CV AUC, test не влияет на настройки; порог 0.5 не подбирается.
+
+Результаты и идентификаторы запусков: reports/results.json; таблицы CV: reports/leaderboard_*.csv. Модели в models/*.pkl содержат предобработку, проверяется свежая загрузка.
+
+## MLflow
 
 ```powershell
 py -3.11 -m uv run --locked mlflow ui --backend-store-uri sqlite:///mlflow.db --host 127.0.0.1 --port 8787
 ```
 
-Open http://127.0.0.1:8787 and the `diabetes-readmission-variant-fourteen` experiment. MLflow stores parameters, metrics, counts, library versions, leaderboards and both models locally. Stop the UI with Ctrl+C. Local database/artifact directories are ignored; rerunning regenerates them. The screenshot in `reports/screenshots/` shows the actual local UI after execution.
+В http://127.0.0.1:8787 откройте experiment diabetes-readmission-variant-fourteen и сравните два запуска. MLflow хранит параметры, метрики, версии, размеры выборок, leaderboard и модели. Скриншот реального UI — reports/screenshots/mlflow_comparison.png. База и каталог артефактов локальны, исключены из Git; повторный запуск создаёт их заново. Для остановки Ctrl+C.
 
-This is an educational retrospective benchmark. First-encounter selection and CPU sampling limit generalization; clinical deployment would require temporal and external validation.
+## Вывод
+
+На таком объёме pandas проще; Spark полезен для демонстрации распределяемой подготовки. AutoML автоматизирует сравнение, но не устраняет необходимость правильного разделения пациентов. Низкий F1 ограничивает поиск редкого исхода. Для клинического применения требуются внешняя и временная валидация.
+
+## Фактические результаты
+
+| Модель | CV ROC-AUC | Test ROC-AUC | F1 | Average precision |
+|---|---:|---:|---:|---:|
+| LogisticRegression | 0.6531 | 0.642709 | 0.010963 | 0.167537 |
+| LinearDiscriminantAnalysis | 0.6557 | 0.645554 | 0.085196 | 0.172922 |
+
+По CV выбран LinearDiscriminantAnalysis. Разница с логистической регрессией мала, а F1 низок: результат не означает готовности к клиническому применению. Test содержит 14304 пациентов, среди них 1259 положительных исходов. Пересечение пациентов с train отсутствует.

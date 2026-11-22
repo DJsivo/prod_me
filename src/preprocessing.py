@@ -1,7 +1,7 @@
-"""Stateless schema adapters included in serialized prediction pipelines."""
+"""Адаптеры схемы без обучаемых параметров для сохраняемого конвейера."""
 import numpy as np
 
 
 def canonicalize_missing(frame):
-    """Normalize None from Parquet object columns before learned imputation."""
+    """Заменяем None из Parquet на NaN перед обучаемым заполнением."""
     return frame.replace({None: np.nan})
